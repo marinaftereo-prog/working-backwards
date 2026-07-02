@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-900 text-ash-300 font-sans antialiased;
+    margin: 0;
+  }
+
+  /* Quiet, warm scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme("colors.ash.600");
+    border-radius: 9999px;
+  }
+}
+
+@layer utilities {
+  /* Soft serif rendering for the obituary passages */
+  .obituary {
+    @apply font-body text-cream-100;
+    font-size: 1.2rem;
+    line-height: 2.1;
+    letter-spacing: 0.01em;
+  }
+
+  .obituary p {
+    margin-bottom: 1.6rem;
+  }
+
+  /* Inputs that recede into the dark */
+  .field {
+    @apply w-full bg-transparent border-b border-ash-600 px-1 py-3
+      text-cream-100 placeholder-ash-500 font-sans
+      focus:outline-none focus:border-ember-400 transition-colors duration-300;
+  }
+
+  textarea.field {
+    @apply resize-none leading-relaxed;
+  }
+}
+
+/* Print / "Save as PDF" — quiet ink on cream paper, obituary only. */
+@media print {
+  body {
+    background: #ffffff;
+  }
+  .obituary {
+    color: #1a1715;
+  }
+  /* Hide everything except the printed obituary article */
+  body * {
+    visibility: hidden;
+  }
+  #aspirational-print,
+  #aspirational-print * {
+    visibility: visible;
+  }
+  #aspirational-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 2rem;
+  }
+}
