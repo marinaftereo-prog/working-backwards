@@ -35,7 +35,7 @@ if (ACCESS_PASSWORD) {
       const decoded = Buffer.from(encoded, "base64").toString();
       if (decoded.slice(decoded.indexOf(":") + 1) === ACCESS_PASSWORD) return next();
     }
-    res.set("WWW-Authenticate", 'Basic realm="Working Backwards — private beta"');
+    res.set("WWW-Authenticate", 'Basic realm="Working Backwards private beta"');
     res.status(401).send("Working Backwards is in private beta.");
   });
 }
