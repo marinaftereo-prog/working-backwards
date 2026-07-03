@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AmbientGlow from "./components/AmbientGlow.jsx";
+import PasswordGate from "./components/screens/PasswordGate.jsx";
 import Welcome from "./components/screens/Welcome.jsx";
 import CurrentIntake from "./components/screens/CurrentIntake.jsx";
 import CurrentReveal from "./components/screens/CurrentReveal.jsx";
@@ -7,6 +8,7 @@ import AspirationalIntake from "./components/screens/AspirationalIntake.jsx";
 import AspirationalReveal from "./components/screens/AspirationalReveal.jsx";
 import WhatMattersMost from "./components/screens/WhatMattersMost.jsx";
 import {
+  getAccessStatus,
   generateCurrentObituary,
   generateAspirationalObituary,
   generateFocus,
@@ -31,6 +33,22 @@ export default function App() {
   const [focusLines, setFocusLines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [access, setAccess] = useState({
+    checked: false,
+    required: false,
+    unlocked: true,
+  });
+
+  // On load, find out whether a private-beta code is required and if we're in.
+  useEffect(() => {
+    getAccessStatus()
+      .then((s) =>
+        setAccess({ checked: true, required: s.required, unlocked: s.unlocked }),
+      )
+      .catch(() =>
+        setAccess({ checked: true, required: false, unlocked: true }),
+      );
+  }, []);
 
   async function handleCurrentSubmit() {
     setError("");
@@ -84,6 +102,12 @@ export default function App() {
       <AmbientGlow />
 
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-12 sm:px-8">
+        {!access.checked ? null : access.required && !access.unlocked ? (
+          <PasswordGate
+            onUnlock={() => setAccess((a) => ({ ...a, unlocked: true }))}
+          />
+        ) : (
+          <>
         {screen === SCREENS.WELCOME && (
           <Welcome onBegin={() => setScreen(SCREENS.CURRENT_INTAKE)} />
         )}
@@ -133,6 +157,8 @@ export default function App() {
             focusLines={focusLines}
             onBack={() => setScreen(SCREENS.ASPIRATIONAL_REVEAL)}
           />
+        )}
+          </>
         )}
       </main>
     </div>

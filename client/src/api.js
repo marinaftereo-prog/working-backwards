@@ -22,6 +22,16 @@ async function post(path, body) {
   return res.json();
 }
 
+export async function getAccessStatus() {
+  const res = await fetch("/api/access-status");
+  if (!res.ok) throw new Error("Could not check access status.");
+  return res.json();
+}
+
+export function unlock(password) {
+  return post("/api/unlock", { password });
+}
+
 export function generateCurrentObituary({ name, answers }) {
   return post("/api/generate-obituary", {
     name,

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import path from "node:path";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
@@ -23,21 +24,47 @@ app.set("trust proxy", 1); // behind Render/Railway's proxy — needed for corre
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
-// --- Access gate (optional): protect the whole app for the private beta -------
-// Set ACCESS_PASSWORD to require a shared password (HTTP Basic Auth). Unset = open.
-// The browser remembers it, so friends & family enter it once. Health stays open.
+// --- Access gate (optional): a shared password for the private beta ----------
+// Set ACCESS_PASSWORD to require a code. Uses a cookie + an in-app password
+// screen, which works reliably on mobile and in-app browsers (Messages,
+// Instagram, etc.) — unlike HTTP Basic Auth. Unset = the app is fully open.
 const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD;
-if (ACCESS_PASSWORD) {
-  app.use((req, res, next) => {
-    if (req.path === "/api/health") return next();
-    const [scheme, encoded] = (req.headers.authorization || "").split(" ");
-    if (scheme === "Basic" && encoded) {
-      const decoded = Buffer.from(encoded, "base64").toString();
-      if (decoded.slice(decoded.indexOf(":") + 1) === ACCESS_PASSWORD) return next();
-    }
-    res.set("WWW-Authenticate", 'Basic realm="Working Backwards private beta"');
-    res.status(401).send("Working Backwards is in private beta.");
-  });
+const ACCESS_TOKEN = ACCESS_PASSWORD
+  ? crypto.createHash("sha256").update(ACCESS_PASSWORD).digest("hex")
+  : null;
+
+function isUnlocked(req) {
+  if (!ACCESS_PASSWORD) return true;
+  const cookie = (req.headers.cookie || "")
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("wb_access="));
+  return !!cookie && cookie.slice("wb_access=".length) === ACCESS_TOKEN;
+}
+
+// The client asks this on load to decide whether to show the password screen.
+app.get("/api/access-status", (req, res) => {
+  res.json({ required: !!ACCESS_PASSWORD, unlocked: isUnlocked(req) });
+});
+
+// Exchange the shared password for a long-lived access cookie.
+app.post("/api/unlock", (req, res) => {
+  const { password } = req.body || {};
+  if (!ACCESS_PASSWORD || password === ACCESS_PASSWORD) {
+    const secure = req.secure ? "; Secure" : "";
+    res.set(
+      "Set-Cookie",
+      `wb_access=${ACCESS_TOKEN || "open"}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 30}${secure}`,
+    );
+    return res.json({ ok: true });
+  }
+  res.status(401).json({ error: "That code isn't right." });
+});
+
+// Guard the generation endpoints (this is what actually costs money).
+function requireAccess(req, res, next) {
+  if (isUnlocked(req)) return next();
+  res.status(401).json({ error: "Please enter the access code to continue." });
 }
 
 // --- Rate limiting: cap generation per IP (public + Opus = real spend) --------
@@ -54,6 +81,7 @@ const generateLimiter = rateLimit({
 });
 app.use(
   ["/api/generate-obituary", "/api/generate-aspirational", "/api/generate-focus"],
+  requireAccess,
   generateLimiter,
 );
 
