@@ -236,14 +236,25 @@ const clientDist = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../client/dist",
 );
-if (fs.existsSync(path.join(clientDist, "index.html"))) {
-  app.use(express.static(clientDist));
-  // SPA fallback: any non-API GET returns index.html.
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(clientDist, "index.html"));
+const indexHtml = path.join(clientDist, "index.html");
+console.log(`[startup] clientDist=${clientDist} hasBuild=${fs.existsSync(indexHtml)}`);
+
+app.use(express.static(clientDist));
+// SPA fallback: any non-API GET returns the app shell.
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  if (!fs.existsSync(indexHtml)) {
+    return res
+      .status(503)
+      .send("Frontend build missing on the server — the client build did not run.");
+  }
+  res.sendFile(indexHtml, (err) => {
+    if (err) {
+      console.error("[static] sendFile failed:", err.message);
+      if (!res.headersSent) res.status(500).send("Could not load the app.");
+    }
   });
-}
+});
 
 app.listen(PORT, () => {
   console.log(`Working Backwards server listening on http://localhost:${PORT}`);
