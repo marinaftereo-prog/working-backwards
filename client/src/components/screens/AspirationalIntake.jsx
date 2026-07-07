@@ -65,7 +65,7 @@ export default function AspirationalIntake({
   return (
     <div className="flex flex-1 flex-col">
       {/* Progress dots */}
-      <div className="mb-16 flex flex-col items-center gap-5">
+      <div className="mb-10 flex flex-col items-center gap-5 sm:mb-16">
         <div className="flex gap-2">
           {QUESTIONS.map((_, i) => (
             <span
@@ -114,7 +114,7 @@ export default function AspirationalIntake({
       )}
 
       {/* Navigation */}
-      <div className="mt-12 flex items-center justify-center gap-6">
+      <div className="mt-10 flex items-center justify-center gap-6 sm:mt-12">
         {!isFirst && (
           <Button variant="quiet" onClick={goBack}>
             Back

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import AmbientGlow from "./components/AmbientGlow.jsx";
 import PasswordGate from "./components/screens/PasswordGate.jsx";
+import Interstitial from "./components/screens/Interstitial.jsx";
 import Welcome from "./components/screens/Welcome.jsx";
+import GoalsIntake from "./components/screens/GoalsIntake.jsx";
 import CurrentIntake from "./components/screens/CurrentIntake.jsx";
 import CurrentReveal from "./components/screens/CurrentReveal.jsx";
 import AspirationalIntake from "./components/screens/AspirationalIntake.jsx";
@@ -16,6 +18,7 @@ import {
 
 const SCREENS = {
   WELCOME: "welcome",
+  GOALS: "goals",
   CURRENT_INTAKE: "current_intake",
   CURRENT_REVEAL: "current_reveal",
   ASPIRATIONAL_INTAKE: "aspirational_intake",
@@ -26,6 +29,7 @@ const SCREENS = {
 export default function App() {
   const [screen, setScreen] = useState(SCREENS.WELCOME);
   const [name, setName] = useState("");
+  const [goals, setGoals] = useState("");
   const [currentAnswers, setCurrentAnswers] = useState(["", "", "", ""]);
   const [aspirationalAnswers, setAspirationalAnswers] = useState(["", "", "", ""]);
   const [currentObituary, setCurrentObituary] = useState("");
@@ -101,15 +105,31 @@ export default function App() {
     <div className="relative min-h-full">
       <AmbientGlow />
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-12 sm:px-8">
+      <main className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-2xl flex-col px-6 py-8 sm:px-8 sm:py-12">
         {!access.checked ? null : access.required && !access.unlocked ? (
           <PasswordGate
             onUnlock={() => setAccess((a) => ({ ...a, unlocked: true }))}
           />
+        ) : loading ? (
+          <Interstitial
+            message={
+              screen === SCREENS.ASPIRATIONAL_INTAKE
+                ? "What to start living up to…"
+                : "Writing your obituary…"
+            }
+          />
         ) : (
           <>
         {screen === SCREENS.WELCOME && (
-          <Welcome onBegin={() => setScreen(SCREENS.CURRENT_INTAKE)} />
+          <Welcome onBegin={() => setScreen(SCREENS.GOALS)} />
+        )}
+
+        {screen === SCREENS.GOALS && (
+          <GoalsIntake
+            goals={goals}
+            setGoals={setGoals}
+            onContinue={() => setScreen(SCREENS.CURRENT_INTAKE)}
+          />
         )}
 
         {screen === SCREENS.CURRENT_INTAKE && (
@@ -154,6 +174,7 @@ export default function App() {
 
         {screen === SCREENS.WHAT_MATTERS && (
           <WhatMattersMost
+            goals={goals}
             focusLines={focusLines}
             onBack={() => setScreen(SCREENS.ASPIRATIONAL_REVEAL)}
           />

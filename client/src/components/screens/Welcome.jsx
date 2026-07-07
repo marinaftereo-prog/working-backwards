@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "../Button.jsx";
+import { QUOTE, ATTRIBUTION } from "../../copy.js";
 
 // ── Landing copy ────────────────────────────────────────────────────────────
-// The opening epigraph. Buffett's actual idea, in his own words (Berkshire 2023:
-// "You should write your obituary and figure out how to live up to it"), lightly
-// trimmed. Kept accurate on purpose — a shaky attribution would undercut the app.
-const QUOTE = "Write your obituary — then figure out how to live up to it.";
-const ATTRIBUTION = "Warren Buffett";
-
 // The promise line, revealed word by word. Marina's words. Note the deliberate
 // motif: the landing asks how you *will* be remembered (the life you're on);
 // the aspirational step later asks how you *want* to be (the life you choose).
@@ -31,49 +26,30 @@ function prefersReducedMotion() {
   );
 }
 
-function introAlreadySeen() {
-  try {
-    return localStorage.getItem("wb_intro_seen") === "1";
-  } catch {
-    return false;
-  }
-}
-
 // Screen 1 — Welcome / Landing. A short cinematic open: an epigraph fades in,
 // dissolves, and gives way to the name, a word-by-word promise, and the CTA.
-// Returning visitors and reduced-motion users skip straight to the end state.
+// It plays on every visit (it's short and powerful); only reduced-motion users
+// skip straight to the end state.
 export default function Welcome({ onBegin }) {
-  const skipIntro = prefersReducedMotion() || introAlreadySeen();
+  const skipIntro = prefersReducedMotion();
 
   const [stage, setStage] = useState(skipIntro ? STAGE.REVEAL : STAGE.QUOTE);
   const [animate, setAnimate] = useState(!skipIntro);
   const [quoteLeaving, setQuoteLeaving] = useState(false);
   const timers = useRef([]);
 
-  function markSeen() {
-    try {
-      localStorage.setItem("wb_intro_seen", "1");
-    } catch {
-      /* private mode — fine, they just see the intro again */
-    }
-  }
-
   // Auto-play the opening: hold the quote, dissolve it, then reveal the rest.
   useEffect(() => {
     if (stage !== STAGE.QUOTE) return;
     timers.current.push(
       setTimeout(() => setQuoteLeaving(true), QUOTE_HOLD),
-      setTimeout(() => {
-        markSeen();
-        setStage(STAGE.REVEAL);
-      }, QUOTE_HOLD + QUOTE_FADE)
+      setTimeout(() => setStage(STAGE.REVEAL), QUOTE_HOLD + QUOTE_FADE)
     );
     return () => timers.current.forEach(clearTimeout);
   }, [stage]);
 
   function skip() {
     timers.current.forEach(clearTimeout);
-    markSeen();
     setStage(STAGE.REVEAL);
   }
 

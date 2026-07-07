@@ -9,9 +9,9 @@ const QUESTIONS = [
 ];
 
 const PLACEHOLDERS = [
-  "Family, friends, and love left behind — their names, and what they mean to you",
+  "Names and what they mean to you",
   "The words people use to describe you",
-  "Your career journey — where you are today, and how you got there",
+  "Where you are today and how you got there",
   "Things big and small",
 ];
 
@@ -86,7 +86,7 @@ export default function CurrentIntake({
   return (
     <div className="flex flex-1 flex-col">
       {/* Progress dots */}
-      <div className="mb-16 flex flex-col items-center gap-5">
+      <div className="mb-10 flex flex-col items-center gap-5 sm:mb-16">
         <div className="flex gap-2">
           {steps.map((_, i) => (
             <span
@@ -98,7 +98,7 @@ export default function CurrentIntake({
           ))}
         </div>
         <p className="font-body text-sm text-ash-500">
-          Take a deep breath, take your time, answer honestly.
+          Take a deep breath, take your time, and answer honestly.
         </p>
       </div>
 
@@ -156,7 +156,7 @@ export default function CurrentIntake({
       )}
 
       {/* Navigation */}
-      <div className="mt-12 flex items-center justify-center gap-6">
+      <div className="mt-10 flex items-center justify-center gap-6 sm:mt-12">
         {!isFirst && (
           <Button variant="quiet" onClick={goBack}>
             Back

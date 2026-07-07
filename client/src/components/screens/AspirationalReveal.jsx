@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Button from "../Button.jsx";
 import Obituary from "../Obituary.jsx";
+import { FEEDBACK_URL } from "../../copy.js";
 
 // Screen 5 — Aspirational obituary reveal. One meaningful next step
 // ("What matters most") plus two quiet options (Share, Save). The focus lines
@@ -45,7 +46,7 @@ export default function AspirationalReveal({ name, obituary, onWhatMatters }) {
   return (
     <div className="flex flex-1 flex-col items-center animate-fadein">
       <p className="mb-12 text-xs uppercase tracking-[0.35em] text-ember-400/70">
-        The life you could grow into
+        What to live up to
       </p>
 
       <article id="aspirational-print" className="w-full max-w-xl">
@@ -68,6 +69,17 @@ export default function AspirationalReveal({ name, obituary, onWhatMatters }) {
       <p className="mt-4 h-5 font-body text-sm text-ember-300 print:hidden">
         {feedback}
       </p>
+
+      {FEEDBACK_URL && (
+        <a
+          href={FEEDBACK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 font-body text-xs uppercase tracking-[0.2em] text-ash-500 transition-colors hover:text-cream-200 print:hidden"
+        >
+          Beta feedback
+        </a>
+      )}
     </div>
   );
 }
