@@ -26,7 +26,7 @@ export default function GoalsIntake({ goals, setGoals, onContinue }) {
         Think about your future.
       </h2>
       <p className="mt-6 max-w-md font-body text-ash-300">
-        What goals do you have for your life?
+        What goals are you working towards right now?
       </p>
 
       <textarea
