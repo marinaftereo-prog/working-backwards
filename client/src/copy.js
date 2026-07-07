@@ -8,4 +8,5 @@ export const ATTRIBUTION = "Warren Buffett";
 
 // Beta feedback form (paste your Google Form / Tally link here). Leave it as ""
 // to hide the feedback links everywhere until you're ready.
-export const FEEDBACK_URL = "";
+export const FEEDBACK_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSeLl2hkUQc5Z6yy0j3CU7QK3GHuftWK2OybkfywBQjIxpUKeQ/viewform";
